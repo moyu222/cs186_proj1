@@ -62,10 +62,10 @@ AS
 -- Question 2i
 CREATE VIEW q2i(namefirst, namelast, playerid, yearid)
 AS
-  SELECT namefirst, namelast, playerid, yearid
+  SELECT p.namefirst, p.namelast, p.playerid, h.yearid
   FROM people p INNER JOIN HallofFame h ON p.playerid = h.playerid
   WHERE h.inducted = 'Y'
-  ORDER BY h.yearid DESC, p.playid
+  ORDER BY h.yearid DESC, p.playerid
 ;
 
 -- Question 2ii
@@ -156,19 +156,18 @@ AS
 CREATE VIEW q4ii(binid, low, high, count)
 AS
   with salaries2016 as(
-	select * from salaries
+    select * from salaries
     where yearid = 2016
   ),
   salaryStats as (
-    select MIN(salary) as mins, MAX(salary) as maxs, (MAX(salary) - MIN(salary))/10.0 as width
+    select MIN(salary) as mins, MAX(salary) as maxs, (MAX(salary)-MIN(salary))/10.0 as width
     from salaries2016
-  ),
-  salaryBin as (
-    selcet s.salary, MIN(CAST((s.salary - salaryStats.mins)/width AS INT),9)
+  ), salaryBins as (
+    select s.salary, MIN(CAST((s.salary - salaryStats.mins)/width AS INT), 9) AS binid
     from salaries2016 s, salaryStats
   )
   SELECT id.binid, id.binid*(select width from salaryStats)+(select mins from salaryStats), (id.binid+1)*(select width from salaryStats)+(select mins from salaryStats), count(*)
-  from binids id LEFT JOIN salaryBins sb ON id.binid = sb.binid
+  from binids id LEFT JOIN salaryBins sb on id.binid = sb.binid
   group by id.binid
 ;
 
